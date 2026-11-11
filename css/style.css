@@ -475,3 +475,89 @@ button:disabled {
 .key-icon .symbol-text {
   line-height: 1;
 }
+
+.export-bar {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #d9d4c7;
+  border-radius: 10px;
+}
+
+.export-bar h2 {
+  font-size: 1.1rem;
+  margin: 0 0 10px;
+  color: #1f5f5b;
+}
+
+.export-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.export-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.export-row label.check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.export-row input[type="number"] {
+  width: 90px;
+}
+
+.export-bar .hint {
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+#print-area {
+  display: none;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main {
+    display: none !important;
+  }
+
+  #print-area {
+    display: block !important;
+  }
+
+  .print-page {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
+    box-shadow: none !important;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

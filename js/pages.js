@@ -141,6 +141,14 @@ const PageRenderer = (function () {
     return key;
   }
 
+  function coverMeta(doc) {
+    return (
+      `${toAr(doc.puzzles.length)} لغزًا - ` +
+      `${toAr(doc.size)} × ${toAr(doc.size)} - ` +
+      `${doc.difficultyLabel}`
+    );
+  }
+
   function renderCover(el, doc, settings) {
     const title = document.createElement("h1");
     title.className = "cover-title";
@@ -151,10 +159,7 @@ const PageRenderer = (function () {
 
     const meta = document.createElement("p");
     meta.className = "cover-meta";
-    meta.textContent =
-      `${toAr(doc.puzzles.length)} لغزًا - ` +
-      `${toAr(doc.size)} × ${toAr(doc.size)} - ` +
-      `${doc.difficultyLabel}`;
+    meta.textContent = coverMeta(doc);
 
     el.append(title, rule, meta);
   }
@@ -207,11 +212,22 @@ const PageRenderer = (function () {
     return el;
   }
 
+  function buildSinglePages(doc, index, includeSolution) {
+    const items = [{ puzzle: doc.puzzles[index], index }];
+    const pages = [{ type: "puzzles", items, header: false }];
+    if (includeSolution) {
+      pages.push({ type: "solutions", items });
+    }
+    return pages;
+  }
+
   return {
     PAPER_SIZES,
     FONTS,
     createSymbolNode,
+    coverMeta,
     buildPages,
+    buildSinglePages,
     renderPage
   };
 })();

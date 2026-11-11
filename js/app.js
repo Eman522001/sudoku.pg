@@ -44,6 +44,14 @@ const colorCells = document.getElementById("color-cells");
 const colorTitle = document.getElementById("color-title");
 const fontSelect = document.getElementById("font-family");
 
+const exportScope = document.getElementById("export-scope");
+const exportPuzzleWrap = document.getElementById("export-puzzle-wrap");
+const exportPuzzleInput = document.getElementById("export-puzzle");
+const exportSolutionWrap = document.getElementById("export-solution-wrap");
+const exportSolution = document.getElementById("export-solution");
+const exportFormat = document.getElementById("export-format");
+const exportButton = document.getElementById("export");
+
 const DIFFICULTY_NAMES = { easy: "سهل", medium: "متوسط", hard: "صعب" };
 const CHIP_KINDS = ["colors", "shapes"];
 const PAGE_NAMES = { cover: "صفحة العنوان", puzzles: "الألغاز", solutions: "الحلول" };
@@ -226,6 +234,7 @@ function layoutPreview() {
 function renderPreview() {
   preview.innerHTML = "";
   if (!doc) return;
+  exportPuzzleInput.max = doc.puzzles.length;
 
   const settings = readSettings();
   const pages = PageRenderer.buildPages(doc, settings);
@@ -288,6 +297,74 @@ async function handleBuild() {
   }
 }
 
+function updateExportMode() {
+  const single = exportScope.value === "single";
+  exportPuzzleWrap.hidden = !single;
+  exportSolutionWrap.hidden = !single;
+}
+
+const PAGE_FILE_NAMES = { cover: "cover", puzzles: "puzzles", solutions: "solutions" };
+
+function pageFileName(page) {
+  if (page.type === "cover") return "sudoku-cover.png";
+  const first = String(page.items[0].index + 1).padStart(2, "0");
+  return `sudoku-${PAGE_FILE_NAMES[page.type]}-${first}.png`;
+}
+
+async function exportPngFiles(pages, settings) {
+  exportButton.disabled = true;
+  try {
+    statusEl.textContent = "جارٍ تجهيز الخطوط والأشكال...";
+    await pause();
+    const assets = await Exporter.prepare(doc, settings);
+
+    const files = [];
+    for (let i = 0; i < pages.length; i++) {
+      statusEl.textContent = `جارٍ رسم الصفحة ${toAr(i + 1)} من ${toAr(pages.length)}...`;
+      await pause();
+      const canvas = await Exporter.renderPageToCanvas(pages[i], doc, settings, assets.images);
+      const blob = await Exporter.canvasToBlob(canvas);
+      const name = pageFileName(pages[i]);
+      files.push({ name, blob });
+    }
+
+    await Exporter.saveFiles(files, "sudoku-pages.zip");
+    statusEl.textContent = `تم تصدير ${toAr(files.length)} ملف PNG بدقة 300 DPI.`;
+  } catch (error) {
+    statusEl.textContent = error.message || "حدث خطأ أثناء التصدير.";
+  } finally {
+    exportButton.disabled = false;
+  }
+}
+
+async function handleExport() {
+  if (!doc) {
+    statusEl.textContent = "أنشئي الصفحات أولاً قبل التصدير.";
+    return;
+  }
+
+  const settings = readSettings();
+  let pages;
+  let exportSettings = settings;
+
+  if (exportScope.value === "single") {
+    const index = clampInt(exportPuzzleInput.value, 1, doc.puzzles.length, 1) - 1;
+    exportPuzzleInput.value = index + 1;
+    exportSettings = { ...settings, cols: 1, rows: 1, showCover: false };
+    pages = PageRenderer.buildSinglePages(doc, index, exportSolution.checked);
+  } else {
+    pages = PageRenderer.buildPages(doc, settings);
+  }
+
+  if (exportFormat.value === "pdf") {
+    statusEl.textContent = "افتحي نافذة الطباعة واختاري «حفظ كـ PDF».";
+    Exporter.printPages(pages, doc, exportSettings);
+    return;
+  }
+
+  await exportPngFiles(pages, exportSettings);
+}
+
 function onSettingsChange() {
   titleSizeValue.textContent = `${toAr(titleSizeInput.value)} pt`;
   renderPreview();
@@ -317,7 +394,10 @@ childrenKind.addEventListener("change", onChildrenChange);
 settingsPanel.addEventListener("input", onSettingsChange);
 settingsPanel.addEventListener("change", onSettingsChange);
 window.addEventListener("resize", layoutPreview);
+exportScope.addEventListener("change", updateExportMode);
+exportButton.addEventListener("click", handleExport);
 
 titleSizeValue.textContent = `${toAr(titleSizeInput.value)} pt`;
 updateChildrenMode();
+updateExportMode();
 handleBuild();

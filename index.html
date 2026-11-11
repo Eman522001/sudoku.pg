@@ -214,14 +214,53 @@
       </fieldset>
     </section>
 
+    <section class="export-bar">
+      <h2>التصدير</h2>
+      <div class="export-row">
+        <label>
+          النطاق
+          <select id="export-scope">
+            <option value="all" selected>كل الصفحات كما في المعاينة</option>
+            <option value="single">لغز واحد</option>
+          </select>
+        </label>
+
+        <label id="export-puzzle-wrap" hidden>
+          رقم اللغز
+          <input id="export-puzzle" type="number" min="1" max="40" value="1" />
+        </label>
+
+        <label id="export-solution-wrap" class="check" hidden>
+          <input id="export-solution" type="checkbox" checked />
+          مع حل اللغز
+        </label>
+
+        <label>
+          الصيغة
+          <select id="export-format">
+            <option value="pdf" selected>PDF عبر نافذة الطباعة</option>
+            <option value="png">PNG بدقة 300 DPI</option>
+          </select>
+        </label>
+
+        <button id="export" class="primary" type="button">تصدير</button>
+      </div>
+      <p class="hint">
+        في نافذة الطباعة اختاري الوجهة «حفظ كـ PDF»، والهوامش «بلا»، وأزيلي خيار الترويسة والتذييل (Headers and footers).
+      </p>
+    </section>
+
     <section class="preview-section">
       <div id="preview" class="preview"></div>
     </section>
   </main>
 
+  <div id="print-area"></div>
+
   <script src="js/sudoku-engine.js"></script>
   <script src="js/symbols.js"></script>
   <script src="js/pages.js"></script>
+  <script src="js/exporter.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
