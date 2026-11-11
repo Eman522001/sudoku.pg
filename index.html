@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>مولّد شبكات السودوكو</title>
+  <title>مولّد صفحات السودوكو</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri&family=Baloo+Bhaijaan+2&family=Cairo&family=Cairo+Play&family=Lemonada&family=Marhey&family=Rakkas&family=Reem+Kufi+Fun&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <main class="container">
-    <h1>مولّد شبكات السودوكو</h1>
+    <h1>مولّد صفحات السودوكو</h1>
 
     <nav class="tabs" role="tablist">
       <button class="tab active" data-tab="general" type="button" role="tab" aria-selected="true">القسم العام</button>
@@ -48,8 +51,6 @@
           </select>
         </label>
       </div>
-
-      <button id="general-generate" type="button">توليد لغز</button>
     </section>
 
     <section id="panel-children" class="panel" hidden>
@@ -100,23 +101,127 @@
       </div>
 
       <p id="children-error" class="error" role="alert"></p>
-
-      <button id="children-generate" type="button">توليد لغز</button>
     </section>
+
+    <div class="build-bar">
+      <label>
+        عدد الألغاز
+        <input id="count" type="number" min="1" max="40" value="4" />
+      </label>
+      <button id="build" class="primary" type="button">توليد الصفحات</button>
+    </div>
 
     <p id="status"></p>
 
-    <div id="board" class="board"></div>
+    <section id="settings" class="settings">
+      <fieldset>
+        <legend>الصفحة</legend>
 
-    <div id="legend" class="legend"></div>
+        <label>
+          المقاس
+          <select id="paper-size">
+            <option value="A4" selected>A4</option>
+            <option value="A5">A5</option>
+          </select>
+        </label>
 
-    <div class="board-actions">
-      <button id="toggle-solution" type="button" disabled>إظهار الحل</button>
-    </div>
+        <label>
+          عدد الألغاز في الصفحة
+          <select id="layout">
+            <option value="1x1">لغز واحد</option>
+            <option value="2x1">لغزان (عمودان)</option>
+            <option value="2x2" selected>٤ ألغاز (٢ × ٢)</option>
+            <option value="2x3">٦ ألغاز (٢ × ٣)</option>
+            <option value="3x3">٩ ألغاز (٣ × ٣)</option>
+          </select>
+        </label>
+
+        <div class="margins">
+          <label>أعلى (مم) <input id="margin-top" type="number" min="0" max="60" value="12" /></label>
+          <label>أسفل (مم) <input id="margin-bottom" type="number" min="0" max="60" value="12" /></label>
+          <label>يمين (مم) <input id="margin-right" type="number" min="0" max="60" value="12" /></label>
+          <label>يسار (مم) <input id="margin-left" type="number" min="0" max="60" value="12" /></label>
+        </div>
+
+        <label>
+          موضع الحلول
+          <select id="solutions-place">
+            <option value="next" selected>في الصفحة التالية</option>
+            <option value="end">في نهاية المستند</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>العنوان</legend>
+
+        <label class="check">
+          <input id="show-cover" type="checkbox" checked />
+          إضافة صفحة عنوان
+        </label>
+
+        <label>
+          عنوان المستند
+          <input id="doc-title" type="text" value="ألغاز السودوكو" />
+        </label>
+
+        <label>
+          حجم العنوان
+          <span class="range-row">
+            <input id="title-size" type="range" min="16" max="48" value="30" />
+            <span id="title-size-value">٣٠ pt</span>
+          </span>
+        </label>
+
+        <label>
+          بادئة عنوان اللغز
+          <input id="puzzle-prefix" type="text" value="لغز" />
+        </label>
+
+        <label>
+          بادئة عنوان الحل
+          <input id="solution-prefix" type="text" value="الحل" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>الألوان والخط</legend>
+
+        <label>
+          لون الأرقام والرموز
+          <input id="color-numbers" type="color" value="#1f2328" />
+        </label>
+
+        <label>
+          لون الخطوط
+          <input id="color-lines" type="color" value="#3d4a50" />
+        </label>
+
+        <label>
+          تعبئة الخلايا
+          <input id="color-cells" type="color" value="#fdfcf9" />
+        </label>
+
+        <label>
+          لون العناوين
+          <input id="color-title" type="color" value="#1f5f5b" />
+        </label>
+
+        <label>
+          الخط
+          <select id="font-family"></select>
+        </label>
+      </fieldset>
+    </section>
+
+    <section class="preview-section">
+      <div id="preview" class="preview"></div>
+    </section>
   </main>
 
   <script src="js/sudoku-engine.js"></script>
   <script src="js/symbols.js"></script>
+  <script src="js/pages.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
