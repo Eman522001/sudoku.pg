@@ -211,6 +211,12 @@
           الخط
           <select id="font-family"></select>
         </label>
+
+        <label>
+          رفع خط خاص (TTF أو OTF أو WOFF)
+          <input id="font-file" type="file" accept=".ttf,.otf,.woff,.woff2" />
+        </label>
+        <p id="font-upload-status" class="hint"></p>
       </fieldset>
     </section>
 
@@ -251,6 +257,7 @@
     </section>
 
     <section class="preview-section">
+      <p class="hint preview-hint">اسحبي أي لغز أو حل إلى موضع آخر لتغيير ترتيبه، وتتحدث أرقام الألغاز تلقائيًا.</p>
       <div id="preview" class="preview"></div>
     </section>
   </main>

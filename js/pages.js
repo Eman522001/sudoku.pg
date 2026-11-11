@@ -105,6 +105,7 @@ const PageRenderer = (function () {
   function renderPuzzleBlock(item, doc, settings, isSolution) {
     const block = document.createElement("div");
     block.className = "puzzle-block";
+    block.dataset.index = item.index;
 
     const label = document.createElement("div");
     label.className = "puzzle-label";
@@ -161,7 +162,16 @@ const PageRenderer = (function () {
     meta.className = "cover-meta";
     meta.textContent = coverMeta(doc);
 
-    el.append(title, rule, meta);
+    const motif = document.createElement("div");
+    motif.className = "cover-symbols";
+    for (const symbol of doc.symbols) {
+      const icon = document.createElement("span");
+      icon.className = "motif";
+      icon.appendChild(createSymbolNode(symbol));
+      motif.appendChild(icon);
+    }
+
+    el.append(title, rule, motif, meta);
   }
 
   function renderPage(page, doc, settings) {

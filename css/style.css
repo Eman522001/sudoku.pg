@@ -561,3 +561,51 @@ button:disabled {
     print-color-adjust: exact !important;
   }
 }
+
+.cover-symbols {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4mm;
+  width: 80%;
+  margin: 0 auto 8mm;
+}
+
+.motif {
+  width: 8mm;
+  height: 8mm;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5mm;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.motif .symbol-color {
+  width: 80%;
+}
+
+.motif .symbol-shape {
+  width: 80%;
+  height: 80%;
+}
+
+.puzzle-block[draggable="true"] {
+  cursor: grab;
+}
+
+.puzzle-block.dragging {
+  opacity: 0.45;
+}
+
+.puzzle-block.drop-target {
+  outline: 2px dashed #1f5f5b;
+  outline-offset: 3mm;
+  border-radius: 4px;
+}
+
+.preview-hint {
+  margin: 0 0 10px;
+}

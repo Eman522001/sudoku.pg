@@ -52,6 +52,9 @@ const exportSolution = document.getElementById("export-solution");
 const exportFormat = document.getElementById("export-format");
 const exportButton = document.getElementById("export");
 
+const fontFileInput = document.getElementById("font-file");
+const fontUploadStatus = document.getElementById("font-upload-status");
+
 const DIFFICULTY_NAMES = { easy: "سهل", medium: "متوسط", hard: "صعب" };
 const CHIP_KINDS = ["colors", "shapes"];
 const PAGE_NAMES = { cover: "صفحة العنوان", puzzles: "الألغاز", solutions: "الحلول" };
@@ -255,6 +258,9 @@ function renderPreview() {
     preview.appendChild(item);
   });
 
+  preview.querySelectorAll(".puzzle-block").forEach((block) => {
+    block.draggable = true;
+  });
   layoutPreview();
   statusEl.textContent =
     `عدد الصفحات: ${toAr(pages.length)} - عدد الألغاز: ${toAr(doc.puzzles.length)}`;
@@ -365,6 +371,104 @@ async function handleExport() {
   await exportPngFiles(pages, exportSettings);
 }
 
+let dragIndex = null;
+
+function puzzleBlockFromEvent(event) {
+  const target = event.target;
+  return target instanceof Element ? target.closest(".puzzle-block") : null;
+}
+
+function moveDocPuzzle(from, to) {
+  if (from === to) return;
+  const [item] = doc.puzzles.splice(from, 1);
+  doc.puzzles.splice(to, 0, item);
+}
+
+function onDragStart(event) {
+  const block = puzzleBlockFromEvent(event);
+  if (!block) return;
+  dragIndex = Number(block.dataset.index);
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", String(dragIndex));
+  block.classList.add("dragging");
+}
+
+function onDragOver(event) {
+  const block = puzzleBlockFromEvent(event);
+  if (!block || dragIndex === null) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
+  preview.querySelectorAll(".drop-target").forEach((el) => {
+    if (el !== block) el.classList.remove("drop-target");
+  });
+  block.classList.add("drop-target");
+}
+
+function onDrop(event) {
+  const block = puzzleBlockFromEvent(event);
+  if (!block || dragIndex === null) return;
+  event.preventDefault();
+  const targetIndex = Number(block.dataset.index);
+  moveDocPuzzle(dragIndex, targetIndex);
+  dragIndex = null;
+  renderPreview();
+}
+
+function onDragEnd() {
+  dragIndex = null;
+  preview.querySelectorAll(".dragging, .drop-target").forEach((el) => {
+    el.classList.remove("dragging", "drop-target");
+  });
+}
+
+function uniqueFontFamily(base) {
+  const cleaned = base.replace(/["\\]/g, "").trim() || "خط مرفوع";
+  const taken = new Set(PageRenderer.FONTS.map((font) => font.key));
+  let name = cleaned;
+  let counter = 2;
+  while (taken.has(name)) {
+    name = `${cleaned} ${toAr(counter)}`;
+    counter++;
+  }
+  return name;
+}
+
+async function handleFontUpload() {
+  const file = fontFileInput.files[0];
+  if (!file) return;
+
+  if (!/\.(ttf|otf|woff2?)$/i.test(file.name)) {
+    fontUploadStatus.textContent = "الصيغ المدعومة: TTF وOTF وWOFF وWOFF2.";
+    fontFileInput.value = "";
+    return;
+  }
+  if (file.size > 8 * 1024 * 1024) {
+    fontUploadStatus.textContent = "حجم الملف أكبر من ٨ ميجابايت.";
+    fontFileInput.value = "";
+    return;
+  }
+
+  try {
+    fontUploadStatus.textContent = "جارٍ تحميل الخط...";
+    const family = uniqueFontFamily(file.name.replace(/\.[^.]+$/, ""));
+    const face = new FontFace(family, await file.arrayBuffer());
+    await face.load();
+    document.fonts.add(face);
+
+    const label = `${family} (مرفوع)`;
+    PageRenderer.FONTS.push({ key: family, label });
+    fontSelect.appendChild(new Option(label, family));
+    fontSelect.value = family;
+
+    fontUploadStatus.textContent = `تم رفع الخط "${family}" وتطبيقه على الصفحات.`;
+    renderPreview();
+  } catch (error) {
+    fontUploadStatus.textContent = "تعذر قراءة هذا الملف كخط. جربي ملف TTF أو OTF آخر.";
+  } finally {
+    fontFileInput.value = "";
+  }
+}
+
 function onSettingsChange() {
   titleSizeValue.textContent = `${toAr(titleSizeInput.value)} pt`;
   renderPreview();
@@ -396,6 +500,11 @@ settingsPanel.addEventListener("change", onSettingsChange);
 window.addEventListener("resize", layoutPreview);
 exportScope.addEventListener("change", updateExportMode);
 exportButton.addEventListener("click", handleExport);
+preview.addEventListener("dragstart", onDragStart);
+preview.addEventListener("dragover", onDragOver);
+preview.addEventListener("drop", onDrop);
+preview.addEventListener("dragend", onDragEnd);
+fontFileInput.addEventListener("change", handleFontUpload);
 
 titleSizeValue.textContent = `${toAr(titleSizeInput.value)} pt`;
 updateChildrenMode();

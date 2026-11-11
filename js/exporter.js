@@ -7,6 +7,8 @@ const Exporter = (function () {
   const KEY_ICON_MM = 6;
   const KEY_ICON_TEXT_MM = 3.6;
   const COVER_META_MM = 4.2;
+  const MOTIF_MM = 8;
+  const MOTIF_GAP_MM = 4;
   const RESERVED_LABEL_MM = 7;
   const JSZIP_URL = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
 
@@ -93,20 +95,20 @@ const Exporter = (function () {
     drawText(ctx, symbol.label, cx, cy, cell * 0.5, weight, font, ink, "center");
   }
 
-  function drawKeySymbol(ctx, symbol, cx, cy, key, font, ink, images) {
+  function drawIcon(ctx, symbol, cx, cy, box, textPx, font, ink, images) {
     if (symbol.kind === "color") {
       ctx.beginPath();
-      ctx.arc(cx, cy, (key.iconSize * 0.8) / 2, 0, Math.PI * 2);
+      ctx.arc(cx, cy, (box * 0.8) / 2, 0, Math.PI * 2);
       ctx.fillStyle = symbol.value;
       ctx.fill();
       return;
     }
     if (symbol.kind === "shape") {
-      const size = key.iconSize * 0.8;
+      const size = box * 0.8;
       ctx.drawImage(images.get(symbol.label), cx - size / 2, cy - size / 2, size, size);
       return;
     }
-    drawText(ctx, symbol.label, cx, cy, KEY_ICON_TEXT_MM * PX_PER_MM, 700, font, ink, "center");
+    drawText(ctx, symbol.label, cx, cy, textPx, 700, font, ink, "center");
   }
 
   function drawBoard(ctx, doc, data, isSolution, x, y, side, settings, images) {
@@ -210,7 +212,7 @@ const Exporter = (function () {
         const iconLeft = right - key.iconSize;
         const cx = iconLeft + key.iconSize / 2;
         const cy = y + key.iconSize / 2;
-        drawKeySymbol(ctx, item.symbol, cx, cy, key, font, ink, images);
+        drawIcon(ctx, item.symbol, cx, cy, key.iconSize, KEY_ICON_TEXT_MM * PX_PER_MM, font, ink, images);
 
         if (item.nameWidth) {
           drawText(ctx, item.symbol.label, iconLeft - key.nameGap, cy, key.namePx, 400, font, ink, "right");
@@ -223,7 +225,36 @@ const Exporter = (function () {
     }
   }
 
-  function drawCover(ctx, box, doc, settings) {
+  function motifLayout(box, count) {
+    const size = MOTIF_MM * PX_PER_MM;
+    const gap = MOTIF_GAP_MM * PX_PER_MM;
+    const maxWidth = (box.right - box.left) * 0.8;
+    const perRow = Math.max(1, Math.floor((maxWidth + gap) / (size + gap)));
+    const rows = Math.ceil(count / perRow);
+    return { size, gap, perRow, rows, height: rows * size + (rows - 1) * gap };
+  }
+
+  function drawCoverMotif(ctx, box, doc, settings, images, topY) {
+    const layout = motifLayout(box, doc.symbols.length);
+    const centerX = (box.left + box.right) / 2;
+    let y = topY;
+
+    for (let r = 0; r < layout.rows; r++) {
+      const items = doc.symbols.slice(r * layout.perRow, (r + 1) * layout.perRow);
+      const rowWidth = items.length * layout.size + (items.length - 1) * layout.gap;
+      let x = centerX + rowWidth / 2 - layout.size / 2;
+
+      for (const symbol of items) {
+        drawIcon(ctx, symbol, x, y + layout.size / 2, layout.size, 5 * PX_PER_MM, settings.font, settings.colors.numbers, images);
+        x -= layout.size + layout.gap;
+      }
+      y += layout.size + layout.gap;
+    }
+
+    return topY + layout.height;
+  }
+
+  function drawCover(ctx, box, doc, settings, images) {
     const font = settings.font;
     const centerX = (box.left + box.right) / 2;
     const titlePx = settings.titleSize * 1.4 * PX_PER_PT;
@@ -233,7 +264,8 @@ const Exporter = (function () {
     const ruleW = 40 * PX_PER_MM;
     const metaPx = COVER_META_MM * PX_PER_MM;
     const metaLine = metaPx * 1.3;
-    const total = titleLine + ruleGap + ruleH + ruleGap + metaLine;
+    const motif = motifLayout(box, doc.symbols.length);
+    const total = titleLine + ruleGap + ruleH + ruleGap + motif.height + ruleGap + metaLine;
 
     let y = (box.top + box.bottom) / 2 - total / 2;
     drawText(ctx, settings.title, centerX, y + titleLine / 2, titlePx, 700, font, settings.colors.title, "center");
@@ -243,6 +275,7 @@ const Exporter = (function () {
     ctx.fillRect(centerX - ruleW / 2, y, ruleW, ruleH);
 
     y += ruleH + ruleGap;
+    y = drawCoverMotif(ctx, box, doc, settings, images, y) + ruleGap;
     drawText(
       ctx,
       PageRenderer.coverMeta(doc),
@@ -277,7 +310,7 @@ const Exporter = (function () {
     };
 
     if (page.type === "cover") {
-      drawCover(ctx, box, doc, settings);
+      drawCover(ctx, box, doc, settings, images);
       return canvas;
     }
 
