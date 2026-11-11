@@ -10,36 +10,113 @@
   <main class="container">
     <h1>مولّد شبكات السودوكو</h1>
 
-    <section class="controls">
-      <label>
-        الحجم
-        <select id="size">
-          <option value="4">4 × 4</option>
-          <option value="6">6 × 6</option>
-          <option value="9" selected>9 × 9</option>
-          <option value="16">16 × 16</option>
-        </select>
-      </label>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="general" type="button" role="tab" aria-selected="true">القسم العام</button>
+      <button class="tab" data-tab="children" type="button" role="tab" aria-selected="false">قسم الأطفال</button>
+    </nav>
 
-      <label>
-        الصعوبة
-        <select id="difficulty">
-          <option value="easy">سهل</option>
-          <option value="medium" selected>متوسط</option>
-          <option value="hard">صعب</option>
-        </select>
-      </label>
+    <section id="panel-general" class="panel">
+      <div class="controls">
+        <label>
+          الحجم
+          <select id="general-size">
+            <option value="4">4 × 4</option>
+            <option value="6">6 × 6</option>
+            <option value="9" selected>9 × 9</option>
+            <option value="16">16 × 16</option>
+          </select>
+        </label>
 
-      <button id="generate" type="button">توليد لغز</button>
-      <button id="toggle-solution" type="button" disabled>إظهار الحل</button>
+        <label>
+          نوع الرموز
+          <select id="general-kind">
+            <option value="arabic-numbers" selected>أرقام عربية</option>
+            <option value="english-numbers">أرقام إنجليزية</option>
+            <option value="arabic-letters">حروف عربية</option>
+            <option value="english-letters">حروف إنجليزية</option>
+            <option value="colors">ألوان</option>
+            <option value="shapes">أشكال</option>
+          </select>
+        </label>
+
+        <label>
+          الصعوبة
+          <select id="general-difficulty">
+            <option value="easy">سهل</option>
+            <option value="medium" selected>متوسط</option>
+            <option value="hard">صعب</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="general-generate" type="button">توليد لغز</button>
+    </section>
+
+    <section id="panel-children" class="panel" hidden>
+      <div class="controls">
+        <label>
+          الحجم
+          <select id="children-size">
+            <option value="4">4 × 4</option>
+            <option value="6">6 × 6</option>
+            <option value="9" selected>9 × 9</option>
+          </select>
+        </label>
+
+        <label>
+          نوع الرموز
+          <select id="children-kind">
+            <option value="arabic-numbers">أرقام عربية</option>
+            <option value="english-numbers">أرقام إنجليزية</option>
+            <option value="arabic-letters" selected>حروف عربية</option>
+            <option value="english-letters">حروف إنجليزية</option>
+            <option value="colors">ألوان</option>
+            <option value="shapes">أشكال</option>
+          </select>
+        </label>
+
+        <label>
+          الصعوبة
+          <select id="children-difficulty">
+            <option value="easy">سهل</option>
+            <option value="medium" selected>متوسط</option>
+            <option value="hard">صعب</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="children-input-wrap" class="input-wrap">
+        <label>
+          الرموز المختارة
+          <input id="children-symbols" type="text" dir="auto" autocomplete="off" />
+        </label>
+      </div>
+
+      <p id="children-hint" class="hint"></p>
+
+      <div id="children-chips-wrap" class="chips-wrap" hidden>
+        <div id="children-chips" class="chips"></div>
+        <p id="children-counter" class="hint"></p>
+      </div>
+
+      <p id="children-error" class="error" role="alert"></p>
+
+      <button id="children-generate" type="button">توليد لغز</button>
     </section>
 
     <p id="status"></p>
 
     <div id="board" class="board"></div>
+
+    <div id="legend" class="legend"></div>
+
+    <div class="board-actions">
+      <button id="toggle-solution" type="button" disabled>إظهار الحل</button>
+    </div>
   </main>
 
   <script src="js/sudoku-engine.js"></script>
+  <script src="js/symbols.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
