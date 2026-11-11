@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مولّد شبكات السودوكو</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>مولّد شبكات السودوكو</h1>
+
+    <section class="controls">
+      <label>
+        الحجم
+        <select id="size">
+          <option value="4">4 × 4</option>
+          <option value="6">6 × 6</option>
+          <option value="9" selected>9 × 9</option>
+          <option value="16">16 × 16</option>
+        </select>
+      </label>
+
+      <label>
+        الصعوبة
+        <select id="difficulty">
+          <option value="easy">سهل</option>
+          <option value="medium" selected>متوسط</option>
+          <option value="hard">صعب</option>
+        </select>
+      </label>
+
+      <button id="generate" type="button">توليد لغز</button>
+      <button id="toggle-solution" type="button" disabled>إظهار الحل</button>
+    </section>
+
+    <p id="status"></p>
+
+    <div id="board" class="board"></div>
+  </main>
+
+  <script src="js/sudoku-engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
