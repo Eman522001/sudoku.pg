@@ -55,6 +55,11 @@ const exportButton = document.getElementById("export");
 const fontFileInput = document.getElementById("font-file");
 const fontUploadStatus = document.getElementById("font-upload-status");
 
+const kidsAgeInput = document.getElementById("kids-age");
+const kidsAuthorInput = document.getElementById("kids-author");
+const styleFieldset = document.getElementById("style-fieldset");
+const themeNote = document.getElementById("theme-note");
+
 const DIFFICULTY_NAMES = { easy: "سهل", medium: "متوسط", hard: "صعب" };
 const CHIP_KINDS = ["colors", "shapes"];
 const PAGE_NAMES = { cover: "صفحة العنوان", puzzles: "الألغاز", solutions: "الحلول" };
@@ -103,7 +108,9 @@ function readSettings() {
       cells: colorCells.value,
       title: colorTitle.value
     },
-    font: fontSelect.value
+    font: fontSelect.value,
+    kidsAge: kidsAgeInput.value.trim(),
+    kidsAuthor: kidsAuthorInput.value.trim()
   };
 }
 
@@ -238,6 +245,11 @@ function renderPreview() {
   preview.innerHTML = "";
   if (!doc) return;
   exportPuzzleInput.max = doc.puzzles.length;
+  const isKids = doc.theme === "kids";
+  styleFieldset.disabled = isKids;
+  themeNote.textContent = isKids
+    ? "تصميم قسم الأطفال ثابت ومطابق للنموذج، والألوان والخط تنطبق على القسم العام فقط."
+    : "";
 
   const settings = readSettings();
   const pages = PageRenderer.buildPages(doc, settings);
@@ -275,6 +287,10 @@ async function handleBuild() {
 
   const count = clampInt(countInput.value, 1, MAX_PUZZLES, 4);
   countInput.value = count;
+  const theme = activeTab === "children" ? "kids" : "general";
+  if (theme === "kids") {
+    layoutSelect.value = "1x1";
+  }
 
   const { size, difficulty, symbols } = content;
   const puzzles = [];
@@ -290,6 +306,7 @@ async function handleBuild() {
     }
 
     doc = {
+      theme,
       size,
       rows: last.rows,
       cols: last.cols,

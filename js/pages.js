@@ -194,6 +194,12 @@ const PageRenderer = (function () {
     el.style.setProperty("--title-size", `${settings.titleSize}pt`);
     el.style.fontFamily = `"${settings.font}", Tahoma, sans-serif`;
 
+    if (doc.theme === "kids") {
+      el.style.padding = "0";
+      el.innerHTML = KidsTheme.markup(page, doc, settings);
+      return el;
+    }
+
     if (page.type === "cover") {
       el.classList.add("cover");
       renderCover(el, doc, settings);

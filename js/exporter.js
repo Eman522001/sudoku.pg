@@ -69,10 +69,13 @@ const Exporter = (function () {
       );
     }
 
+    await KidsTheme.loadFonts();
+
     const images = new Map();
     for (const symbol of doc.symbols) {
       if (symbol.kind === "shape" && !images.has(symbol.label)) {
-        const image = await loadSvgImage(shapeMarkup(symbol.svg, settings.colors.numbers));
+        const ink = doc.theme === "kids" ? KidsTheme.ink : settings.colors.numbers;
+        const image = await loadSvgImage(shapeMarkup(symbol.svg, ink));
         images.set(symbol.label, image);
       }
     }
@@ -300,6 +303,11 @@ const Exporter = (function () {
     const ctx = canvas.getContext("2d");
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, width, height);
+
+    if (doc.theme === "kids") {
+      KidsTheme.draw(ctx, page, doc, settings, images, width / KidsTheme.WIDTH);
+      return canvas;
+    }
 
     const m = settings.margins;
     const box = {

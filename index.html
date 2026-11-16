@@ -192,7 +192,21 @@
         </label>
       </fieldset>
 
-      <fieldset>
+      <fieldset id="kids-fieldset">
+        <legend>قسم الأطفال</legend>
+
+        <label>
+          الفئة العمرية على الغلاف
+          <input id="kids-age" type="text" value="من عمر 3 حتى 10 سنوات" />
+        </label>
+
+        <label>
+          اسم المُعِدّ على الغلاف
+          <input id="kids-author" type="text" value="إيمان صبحي" />
+        </label>
+      </fieldset>
+
+      <fieldset id="style-fieldset">
         <legend>الألوان والخط</legend>
 
         <label>
@@ -266,6 +280,7 @@
 
     <section class="preview-section">
       <p class="hint preview-hint">اسحبي أي لغز أو حل إلى موضع آخر لتغيير ترتيبه، وتتحدث أرقام الألغاز تلقائيًا.</p>
+      <p id="theme-note" class="hint"></p>
       <div id="preview" class="preview"></div>
     </section>
   </main>
@@ -275,6 +290,7 @@
   <script src="js/sudoku-engine.js"></script>
   <script src="js/symbols.js"></script>
   <script src="js/pages.js"></script>
+  <script src="js/kids.js"></script>
   <script src="js/exporter.js"></script>
   <script src="js/app.js"></script>
   <script src="js/pwa.js"></script>

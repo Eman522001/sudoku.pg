@@ -1,4 +1,4 @@
-const SHELL_CACHE = "sudoku-shell-v1";
+const SHELL_CACHE = "sudoku-shell-v2";
 const FONT_CACHE = "sudoku-fonts-v1";
 const KEEP_CACHES = [SHELL_CACHE, FONT_CACHE];
 
@@ -10,6 +10,7 @@ const SHELL_FILES = [
   "./js/sudoku-engine.js",
   "./js/symbols.js",
   "./js/pages.js",
+  "./js/kids.js",
   "./js/exporter.js",
   "./js/app.js",
   "./js/pwa.js",
