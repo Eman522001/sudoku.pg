@@ -304,6 +304,10 @@ const Exporter = (function () {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, width, height);
 
+    if (doc.theme === "adult" && doc.decorated) {
+      return DecoTheme.renderCanvas(page, doc, settings);
+    }
+
     if (doc.theme === "kids") {
       KidsTheme.draw(ctx, page, doc, settings, images, width / KidsTheme.WIDTH);
       return canvas;

@@ -195,6 +195,12 @@ const PageRenderer = (function () {
     el.style.setProperty("--title-size", `${settings.titleSize}pt`);
     el.style.fontFamily = `"${settings.font}", Tahoma, sans-serif`;
 
+    if (doc.theme === "adult" && doc.decorated) {
+      el.style.padding = "0";
+      el.innerHTML = DecoTheme.markup(page, doc, settings);
+      return el;
+    }
+
     if (doc.theme === "kids") {
       el.style.padding = "0";
       el.innerHTML = KidsTheme.markup(page, doc, settings);

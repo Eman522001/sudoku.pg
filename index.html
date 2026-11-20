@@ -24,6 +24,7 @@
     <nav class="tabs" role="tablist">
       <button class="tab active" data-tab="general" type="button" role="tab" aria-selected="true">القسم العام</button>
       <button class="tab" data-tab="children" type="button" role="tab" aria-selected="false">قسم الأطفال</button>
+      <button class="tab" data-tab="adult" type="button" role="tab" aria-selected="false">قسم البالغين</button>
     </nav>
 
     <section id="panel-general" class="panel">
@@ -56,6 +57,47 @@
             <option value="easy">سهل</option>
             <option value="medium" selected>متوسط</option>
             <option value="hard">صعب</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section id="panel-adult" class="panel" hidden>
+      <div class="controls">
+        <label>
+          الحجم
+          <select id="adult-size">
+            <option value="4">4 × 4</option>
+            <option value="6">6 × 6</option>
+            <option value="9" selected>9 × 9</option>
+            <option value="16">16 × 16</option>
+          </select>
+        </label>
+
+        <label>
+          نوع الرموز
+          <select id="adult-kind">
+            <option value="arabic-numbers" selected>أرقام عربية</option>
+            <option value="english-numbers">أرقام إنجليزية</option>
+            <option value="arabic-letters">حروف عربية</option>
+            <option value="english-letters">حروف إنجليزية</option>
+          </select>
+        </label>
+
+        <label>
+          الصعوبة
+          <select id="adult-difficulty">
+            <option value="easy">سهل</option>
+            <option value="medium" selected>متوسط</option>
+            <option value="hard">صعب</option>
+          </select>
+        </label>
+
+        <label>
+          التصميم
+          <select id="adult-design">
+            <option value="decorated" selected>مزخرف بالرسومات</option>
+            <option value="plain">عادي</option>
           </select>
         </label>
       </div>
@@ -117,6 +159,7 @@
         <input id="count" type="number" min="1" max="40" value="4" />
       </label>
       <button id="build" class="primary" type="button">توليد الصفحات</button>
+      <button id="regen" type="button" hidden>توليد رسومات جديدة</button>
     </div>
 
     <p id="status"></p>
@@ -203,6 +246,25 @@
         <label>
           اسم المُعِدّ على الغلاف
           <input id="kids-author" type="text" value="إيمان صبحي" />
+        </label>
+      </fieldset>
+
+      <fieldset id="adult-style-fieldset" disabled>
+        <legend>ألوان وخط قسم البالغين</legend>
+
+        <label>
+          لون الرسم والأرقام
+          <input id="adult-ink" type="color" value="#111111" />
+        </label>
+
+        <label>
+          لون الخلايا الرمادية
+          <input id="adult-gray" type="color" value="#E8E8E8" />
+        </label>
+
+        <label>
+          الخط
+          <select id="adult-font"></select>
         </label>
       </fieldset>
 
@@ -330,6 +392,7 @@
   <script src="js/symbols.js"></script>
   <script src="js/pages.js"></script>
   <script src="js/kids.js"></script>
+  <script src="js/deco.js"></script>
   <script src="js/exporter.js"></script>
   <script src="js/app.js"></script>
   <script src="js/pwa.js"></script>

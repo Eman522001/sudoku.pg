@@ -1,7 +1,8 @@
 const tabButtons = document.querySelectorAll(".tab");
 const panels = {
   general: document.getElementById("panel-general"),
-  children: document.getElementById("panel-children")
+  children: document.getElementById("panel-children"),
+  adult: document.getElementById("panel-adult")
 };
 
 const generalSize = document.getElementById("general-size");
@@ -67,6 +68,16 @@ const kidsTitleInput = document.getElementById("kids-title");
 const kidsCellsDefaultInput = document.getElementById("kids-cells-default");
 const kidsCellsInput = document.getElementById("kids-cells");
 const kidsFontSelect = document.getElementById("kids-font");
+const adultPanel = document.getElementById("panel-adult");
+const adultSizeSelect = document.getElementById("adult-size");
+const adultKindSelect = document.getElementById("adult-kind");
+const adultDifficultySelect = document.getElementById("adult-difficulty");
+const adultDesignSelect = document.getElementById("adult-design");
+const adultStyleFieldset = document.getElementById("adult-style-fieldset");
+const adultInkInput = document.getElementById("adult-ink");
+const adultGrayInput = document.getElementById("adult-gray");
+const adultFontSelect = document.getElementById("adult-font");
+const regenButton = document.getElementById("regen");
 
 const DIFFICULTY_NAMES = { easy: "سهل", medium: "متوسط", hard: "صعب" };
 const CHIP_KINDS = ["colors", "shapes"];
@@ -136,6 +147,14 @@ function showChildrenError(message) {
 }
 
 function readContent() {
+  if (activeTab === "adult") {
+    const size = Number(adultSizeSelect.value);
+    return {
+      size,
+      difficulty: adultDifficultySelect.value,
+      symbols: SymbolSets.buildGeneralSymbols(adultKindSelect.value, size)
+    };
+  }
   if (activeTab === "general") {
     const size = Number(generalSize.value);
     return {
@@ -264,7 +283,7 @@ function renderPreview() {
   exportPuzzleInput.max = doc.puzzles.length;
   updateStyleFieldsets();
 
-  const settings = readSettings();
+  const settings = applyTheme(readSettings());
   const pages = PageRenderer.buildPages(doc, settings);
 
   pages.forEach((page, index) => {
@@ -300,8 +319,9 @@ async function handleBuild() {
 
   const count = clampInt(countInput.value, 1, MAX_PUZZLES, 4);
   countInput.value = count;
-  const theme = activeTab === "children" ? "kids" : "general";
-  if (theme === "kids") {
+  const theme = activeTab === "children" ? "kids" : activeTab === "adult" ? "adult" : "general";
+  const decorated = theme === "adult" && adultDesignSelect.value === "decorated";
+  if (theme === "kids" || decorated) {
     layoutSelect.value = "1x1";
   }
 
@@ -320,6 +340,8 @@ async function handleBuild() {
 
     doc = {
       theme,
+      decorated,
+      seeds: decorated ? DecoTheme.makeSeeds(count) : null,
       size,
       rows: last.rows,
       cols: last.cols,
@@ -379,7 +401,7 @@ async function handleExport() {
     return;
   }
 
-  const settings = readSettings();
+  const settings = applyTheme(readSettings());
   let pages;
   let exportSettings = settings;
 
@@ -489,6 +511,7 @@ async function handleFontUpload() {
     PageRenderer.FONTS.push({ key: family, label });
     fontSelect.appendChild(new Option(label, family));
     kidsFontSelect.appendChild(new Option(label, family));
+    adultFontSelect.appendChild(new Option(label, family));
     fontSelect.value = family;
 
     fontUploadStatus.textContent = `تم رفع الخط "${family}" وتطبيقه على الصفحات.`;
@@ -498,6 +521,24 @@ async function handleFontUpload() {
   } finally {
     fontFileInput.value = "";
   }
+}
+
+function applyTheme(settings) {
+  if (!doc || doc.theme !== "adult") return settings;
+  const ink = adultInkInput.value;
+  const result = {
+    ...settings,
+    font: adultFontSelect.value,
+    colors: { numbers: ink, lines: ink, cells: "#FFFFFF", title: ink, gray: adultGrayInput.value }
+  };
+  if (doc.decorated) result.showCover = false;
+  return result;
+}
+
+function handleRegenerate() {
+  if (!doc || !doc.decorated) return;
+  doc.seeds = DecoTheme.makeSeeds(doc.puzzles.length);
+  renderPreview();
 }
 
 function onSettingsChange() {
@@ -511,23 +552,25 @@ function refreshThemeNote() {
     themeNote.textContent = "";
     return;
   }
-  const kidsTab = activeTab === "children";
-  const docIsKids = doc.theme === "kids";
-  if (kidsTab && !docIsKids) {
-    themeNote.textContent = "عدّلي الألوان والخط كما تحبين، ثم اضغطي «توليد الصفحات» لتطبيقها على قسم الأطفال.";
-  } else if (!kidsTab && docIsKids) {
-    themeNote.textContent = "اضغطي «توليد الصفحات» لعرض القسم العام بالإعدادات الحالية.";
-  } else if (docIsKids) {
+  const expected = { general: "general", children: "kids", adult: "adult" }[activeTab];
+  if (expected !== doc.theme) {
+    themeNote.textContent = "عدّلي الإعدادات كما تحبين، ثم اضغطي «توليد الصفحات» لتطبيقها على هذا القسم.";
+    return;
+  }
+  if (doc.theme === "kids") {
     themeNote.textContent = "شكل تصميم قسم الأطفال ثابت، والألوان والخط تُعدَّل من قسم «ألوان وخط قسم الأطفال».";
+  } else if (doc.theme === "adult" && doc.decorated) {
+    themeNote.textContent = "كل صفحة لها رسومات مختلفة، واضغطي «توليد رسومات جديدة» لتغييرها. القلب في الأسفل ثابت ومكانه فارغ لرقم الصفحة.";
   } else {
     themeNote.textContent = "";
   }
 }
 
 function updateStyleFieldsets() {
-  const kidsTab = activeTab === "children";
-  styleFieldset.disabled = kidsTab;
-  kidsStyleFieldset.disabled = !kidsTab;
+  styleFieldset.disabled = activeTab !== "general";
+  kidsStyleFieldset.disabled = activeTab !== "children";
+  adultStyleFieldset.disabled = activeTab !== "adult";
+  regenButton.hidden = !(activeTab === "adult" && adultDesignSelect.value === "decorated");
   refreshThemeNote();
 }
 
@@ -540,14 +583,17 @@ function switchTab(name) {
   });
   panels.general.hidden = name !== "general";
   panels.children.hidden = name !== "children";
+  panels.adult.hidden = name !== "adult";
   updateStyleFieldsets();
 }
 
 PageRenderer.FONTS.forEach((font) => {
   fontSelect.appendChild(new Option(font.label, font.key));
   kidsFontSelect.appendChild(new Option(font.label, font.key));
+  adultFontSelect.appendChild(new Option(font.label, font.key));
 });
 kidsFontSelect.value = KidsTheme.DEFAULT_FONT;
+adultFontSelect.value = DecoTheme.DEFAULT_FONT;
 
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => switchTab(button.dataset.tab));
@@ -565,6 +611,8 @@ preview.addEventListener("dragover", onDragOver);
 preview.addEventListener("drop", onDrop);
 preview.addEventListener("dragend", onDragEnd);
 fontFileInput.addEventListener("change", handleFontUpload);
+regenButton.addEventListener("click", handleRegenerate);
+adultDesignSelect.addEventListener("change", updateStyleFieldsets);
 
 titleSizeValue.textContent = `${toAr(titleSizeInput.value)} pt`;
 updateChildrenMode();
