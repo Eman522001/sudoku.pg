@@ -7,6 +7,7 @@ const PageRenderer = (function () {
   const FONTS = [
     { key: "Cairo", label: "كايرو (افتراضي)" },
     { key: "Amiri", label: "أميري (نسخ كلاسيكي)" },
+    { key: "DG Forsha Scribble", label: "DG Forsha Scribble (مميز للأطفال)" },
     { key: "Rakkas", label: "خط الفرشاة" },
     { key: "Baloo Bhaijaan 2", label: "بلابيلو" },
     { key: "Lemonada", label: "ليمونادا (طفولي)" },

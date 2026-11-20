@@ -1,0 +1,9 @@
+DG Forsha Scribble
+
+Copyright (c) 2021 Hossam El Deen Ahmed. All rights reserved.
+Trademark: DG Forsha Font is a trademark of Hossam El Deen Ahmed
+Designer: https://twitter.com/HossamElNazawy https://www.behance.net/HossamAbulBara
+Contact: abulbara91@gmail.com
+
+The font is included in this project at the request of the project owner, who accepts responsibility for its use.
+The original font file is distributed by the designer; this file is the same font converted to WOFF2 for web use.

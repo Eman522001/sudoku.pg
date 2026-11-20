@@ -609,3 +609,9 @@ button:disabled {
 .preview-hint {
   margin: 0 0 10px;
 }
+
+@font-face {
+  font-family: "DG Forsha Scribble";
+  src: url("../fonts/DG-Forsha-Scribble.woff2") format("woff2");
+  font-display: swap;
+}
