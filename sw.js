@@ -1,4 +1,4 @@
-const SHELL_CACHE = "sudoku-shell-v3";
+const SHELL_CACHE = "sudoku-shell-v4";
 const FONT_CACHE = "sudoku-fonts-v1";
 const KEEP_CACHES = [SHELL_CACHE, FONT_CACHE];
 

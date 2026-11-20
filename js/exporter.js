@@ -69,12 +69,12 @@ const Exporter = (function () {
       );
     }
 
-    await KidsTheme.loadFonts();
+    await KidsTheme.loadFonts(settings);
 
     const images = new Map();
     for (const symbol of doc.symbols) {
       if (symbol.kind === "shape" && !images.has(symbol.label)) {
-        const ink = doc.theme === "kids" ? KidsTheme.ink : settings.colors.numbers;
+        const ink = doc.theme === "kids" ? KidsTheme.inkFor(settings) : settings.colors.numbers;
         const image = await loadSvgImage(shapeMarkup(symbol.svg, ink));
         images.set(symbol.label, image);
       }

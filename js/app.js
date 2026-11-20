@@ -59,6 +59,14 @@ const kidsAgeInput = document.getElementById("kids-age");
 const kidsAuthorInput = document.getElementById("kids-author");
 const styleFieldset = document.getElementById("style-fieldset");
 const themeNote = document.getElementById("theme-note");
+const kidsStyleFieldset = document.getElementById("kids-style-fieldset");
+const kidsBackgroundInput = document.getElementById("kids-background");
+const kidsNumbersInput = document.getElementById("kids-numbers");
+const kidsLinesInput = document.getElementById("kids-lines");
+const kidsTitleInput = document.getElementById("kids-title");
+const kidsCellsDefaultInput = document.getElementById("kids-cells-default");
+const kidsCellsInput = document.getElementById("kids-cells");
+const kidsFontSelect = document.getElementById("kids-font");
 
 const DIFFICULTY_NAMES = { easy: "سهل", medium: "متوسط", hard: "صعب" };
 const CHIP_KINDS = ["colors", "shapes"];
@@ -110,7 +118,16 @@ function readSettings() {
     },
     font: fontSelect.value,
     kidsAge: kidsAgeInput.value.trim(),
-    kidsAuthor: kidsAuthorInput.value.trim()
+    kidsAuthor: kidsAuthorInput.value.trim(),
+    kids: {
+      background: kidsBackgroundInput.value,
+      numbers: kidsNumbersInput.value,
+      lines: kidsLinesInput.value,
+      title: kidsTitleInput.value,
+      cellsDefault: kidsCellsDefaultInput.checked,
+      cells: kidsCellsInput.value,
+      font: kidsFontSelect.value
+    }
   };
 }
 
@@ -247,8 +264,9 @@ function renderPreview() {
   exportPuzzleInput.max = doc.puzzles.length;
   const isKids = doc.theme === "kids";
   styleFieldset.disabled = isKids;
+  kidsStyleFieldset.disabled = !isKids;
   themeNote.textContent = isKids
-    ? "تصميم قسم الأطفال ثابت ومطابق للنموذج، والألوان والخط تنطبق على القسم العام فقط."
+    ? "شكل تصميم قسم الأطفال ثابت ومطابق للنموذج، والألوان والخط تُعدَّل من قسم \"ألوان وخط قسم الأطفال\"."
     : "";
 
   const settings = readSettings();
@@ -475,6 +493,7 @@ async function handleFontUpload() {
     const label = `${family} (مرفوع)`;
     PageRenderer.FONTS.push({ key: family, label });
     fontSelect.appendChild(new Option(label, family));
+    kidsFontSelect.appendChild(new Option(label, family));
     fontSelect.value = family;
 
     fontUploadStatus.textContent = `تم رفع الخط "${family}" وتطبيقه على الصفحات.`;
@@ -487,6 +506,7 @@ async function handleFontUpload() {
 }
 
 function onSettingsChange() {
+  kidsCellsInput.disabled = kidsCellsDefaultInput.checked;
   titleSizeValue.textContent = `${toAr(titleSizeInput.value)} pt`;
   renderPreview();
 }
@@ -504,7 +524,9 @@ function switchTab(name) {
 
 PageRenderer.FONTS.forEach((font) => {
   fontSelect.appendChild(new Option(font.label, font.key));
+  kidsFontSelect.appendChild(new Option(font.label, font.key));
 });
+kidsFontSelect.value = KidsTheme.DEFAULT_FONT;
 
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => switchTab(button.dataset.tab));
@@ -526,4 +548,5 @@ fontFileInput.addEventListener("change", handleFontUpload);
 titleSizeValue.textContent = `${toAr(titleSizeInput.value)} pt`;
 updateChildrenMode();
 updateExportMode();
+kidsCellsInput.disabled = kidsCellsDefaultInput.checked;
 handleBuild();

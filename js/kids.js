@@ -6,33 +6,17 @@ const KidsTheme = (function () {
   const BORDER_REF = 24;
   const THIN_REF = 4;
 
-  const COLORS = {
-    background: "#5170FF",
-    navy: "#033372",
-    white: "#FFFFFF",
-    coverFrame: "#FDFDFD",
-    cardBorder: "#3B2E8C",
-    line: "#000000",
-    cells: ["#FFF3C2", "#D8C7FA", "#C2DCFF", "#E4FFC2"]
-  };
-
-  const FAMILY = {
-    title: `"Baloo Bhaijaan 2", Tahoma, sans-serif`,
-    digits: `"Rakkas", Tahoma, sans-serif`,
-    text: `"Cairo", Tahoma, sans-serif`
-  };
+  const DEFAULT_CELLS = ["#FFF3C2", "#D8C7FA", "#C2DCFF", "#E4FFC2"];
+  const CARD_BORDER = "#3B2E8C";
+  const WHITE = "#FFFFFF";
+  const COVER_FRAME = "#FDFDFD";
+  const LINE_BLACK = "#000000";
+  const DEFAULT_FONT = "DG Forsha Scribble";
 
   const DEFAULTS = {
     age: "من عمر 3 حتى 10 سنوات",
     author: "إيمان صبحي"
   };
-
-  const FONT_LOADS = [
-    '800 40px "Baloo Bhaijaan 2"',
-    '600 40px "Baloo Bhaijaan 2"',
-    '40px "Rakkas"',
-    '700 40px "Cairo"'
-  ];
 
   const DECOR_BARS = [
     { x: 37, y: 37, w: 148, h: 18, fill: "#FFE066" },
@@ -63,6 +47,20 @@ const KidsTheme = (function () {
     [48, 710, 9, "#E3D0FF"], [68, 780, 8, "#E3D0FF"]
   ];
 
+  function themeOf(settings) {
+    const k = settings.kids || {};
+    const font = k.font || DEFAULT_FONT;
+    return {
+      background: k.background || "#5170FF",
+      ink: k.numbers || "#033372",
+      lines: k.lines || "#033372",
+      title: k.title || WHITE,
+      cells: k.cellsDefault === false ? [k.cells || "#FFF3C2"] : DEFAULT_CELLS,
+      family: `"${font}", Tahoma, sans-serif`,
+      font
+    };
+  }
+
   function s(value) {
     return value * DISPLAY_SCALE;
   }
@@ -78,12 +76,12 @@ const KidsTheme = (function () {
     );
   }
 
-  function symbolItems(symbol, cx, cy, cell) {
+  function symbolItems(symbol, cx, cy, cell, t) {
     if (symbol.kind === "color") {
       return [{ t: "circle", x: cx, y: cy, r: cell * 0.26, fill: symbol.value }];
     }
     if (symbol.kind === "shape") {
-      return [{ t: "shape", cx, cy, size: cell * 0.5, svg: symbol.svg, color: COLORS.navy, label: symbol.label }];
+      return [{ t: "shape", cx, cy, size: cell * 0.5, svg: symbol.svg, color: t.ink, label: symbol.label }];
     }
     return [
       text({
@@ -91,13 +89,13 @@ const KidsTheme = (function () {
         y: cy,
         text: symbol.label,
         size: cell * 0.48,
-        family: FAMILY.digits,
-        fill: COLORS.navy
+        family: t.family,
+        fill: t.ink
       })
     ];
   }
 
-  function boardItems(doc, data, isSolution, x, y, side) {
+  function boardItems(doc, data, isSolution, x, y, side, t) {
     const { size, rows, cols, symbols } = doc;
     const k = side / BOARD_REF;
     const border = BORDER_REF * k;
@@ -108,25 +106,25 @@ const KidsTheme = (function () {
     const cell = inner / size;
     const boxesPerRow = size / cols;
 
-    const items = [rect(x, y, side, side, COLORS.navy)];
+    const items = [rect(x, y, side, side, t.lines)];
 
     for (let r = 0; r < size; r++) {
       for (let c = 0; c < size; c++) {
         const box = Math.floor(r / rows) * boxesPerRow + Math.floor(c / cols);
-        items.push(rect(ax + c * cell, ay + r * cell, cell, cell, COLORS.cells[box % COLORS.cells.length]));
+        items.push(rect(ax + c * cell, ay + r * cell, cell, cell, t.cells[box % t.cells.length]));
       }
     }
 
     for (let i = 1; i < size; i++) {
       if (i % cols === 0) {
-        items.push(rect(ax + i * cell - border / 2, ay, border, inner, COLORS.navy));
+        items.push(rect(ax + i * cell - border / 2, ay, border, inner, t.lines));
       } else {
-        items.push(rect(ax + i * cell - thin / 2, ay, thin, inner, COLORS.line));
+        items.push(rect(ax + i * cell - thin / 2, ay, thin, inner, LINE_BLACK));
       }
       if (i % rows === 0) {
-        items.push(rect(ax, ay + i * cell - border / 2, inner, border, COLORS.navy));
+        items.push(rect(ax, ay + i * cell - border / 2, inner, border, t.lines));
       } else {
-        items.push(rect(ax, ay + i * cell - thin / 2, inner, thin, COLORS.line));
+        items.push(rect(ax, ay + i * cell - thin / 2, inner, thin, LINE_BLACK));
       }
     }
 
@@ -135,14 +133,14 @@ const KidsTheme = (function () {
         const index = r * size + c;
         const value = isSolution ? data.solution[index] : data.puzzle[index];
         if (!value) continue;
-        items.push(...symbolItems(symbols[value - 1], ax + (c + 0.5) * cell, ay + (r + 0.5) * cell, cell));
+        items.push(...symbolItems(symbols[value - 1], ax + (c + 0.5) * cell, ay + (r + 0.5) * cell, cell, t));
       }
     }
 
     return items;
   }
 
-  function keyItems(symbols) {
+  function keyItems(symbols, t) {
     const perRow = 5;
     const colWidth = 220;
     const cell = 150;
@@ -156,16 +154,16 @@ const KidsTheme = (function () {
       const col = i % perRow;
       const x = WIDTH / 2 + ((inRow - 1) / 2 - col) * colWidth;
       const y = top + row * rowHeight;
-      items.push(...symbolItems(symbol, x, y, cell));
+      items.push(...symbolItems(symbol, x, y, cell, t));
       items.push(
         text({
           x,
           y: y + 72,
           text: symbol.label,
           size: 40,
-          family: FAMILY.text,
+          family: t.family,
           weight: 700,
-          fill: COLORS.navy
+          fill: t.ink
         })
       );
     });
@@ -173,8 +171,8 @@ const KidsTheme = (function () {
     return items;
   }
 
-  function coverItems(doc, settings) {
-    const items = [rect(0, 0, WIDTH, HEIGHT, COLORS.background)];
+  function coverItems(doc, settings, t) {
+    const items = [rect(0, 0, WIDTH, HEIGHT, t.background)];
 
     DECOR_BARS.forEach((bar) => {
       items.push(rect(s(bar.x), s(bar.y), s(bar.w), s(bar.h), bar.fill, { r: s(bar.h) / 2 }));
@@ -191,7 +189,7 @@ const KidsTheme = (function () {
           y: s(glyph.y),
           text: glyph.text,
           size: s(glyph.size),
-          family: FAMILY.title,
+          family: t.family,
           weight: 800,
           fill: glyph.fill,
           rot: glyph.rot
@@ -205,10 +203,10 @@ const KidsTheme = (function () {
         y: s(150),
         text: "لعبة",
         size: 88,
-        family: FAMILY.title,
+        family: t.family,
         weight: 800,
-        fill: COLORS.white,
-        stroke: COLORS.navy,
+        fill: t.title,
+        stroke: t.lines,
         sw: 22
       })
     );
@@ -218,10 +216,10 @@ const KidsTheme = (function () {
         y: s(242),
         text: settings.kidsTitle || "سودوكو",
         size: 340,
-        family: FAMILY.title,
+        family: t.family,
         weight: 800,
-        fill: COLORS.white,
-        stroke: COLORS.navy,
+        fill: t.title,
+        stroke: t.lines,
         sw: 26
       })
     );
@@ -231,35 +229,35 @@ const KidsTheme = (function () {
         y: 520,
         text: "للأطفال",
         size: 80,
-        family: FAMILY.title,
+        family: t.family,
         weight: 800,
-        fill: COLORS.white,
-        stroke: COLORS.navy,
+        fill: t.title,
+        stroke: t.lines,
         sw: 22
       })
     );
 
-    items.push(rect(s(238), s(408), s(400), s(100), COLORS.navy, { r: s(50) }));
+    items.push(rect(s(238), s(408), s(400), s(100), t.lines, { r: s(50) }));
     items.push(
       text({
         x: s(438),
         y: s(458),
         text: settings.kidsAge || DEFAULTS.age,
         size: 58,
-        family: FAMILY.text,
+        family: t.family,
         weight: 700,
-        fill: COLORS.white
+        fill: t.title
       })
     );
 
     items.push(
-      rect(328, 884, 752, 735, COLORS.coverFrame, {
+      rect(328, 884, 752, 735, COVER_FRAME, {
         r: 90,
-        stroke: COLORS.navy,
+        stroke: t.lines,
         sw: 11
       })
     );
-    items.push(...boardItems(doc, doc.puzzles[0], false, 386, 943, 637));
+    items.push(...boardItems(doc, doc.puzzles[0], false, 386, 943, 637, t));
 
     items.push(
       text({
@@ -267,10 +265,10 @@ const KidsTheme = (function () {
         y: s(1120),
         text: "إعداد وتصميم:",
         size: 62,
-        family: FAMILY.title,
+        family: t.family,
         weight: 600,
-        fill: COLORS.white,
-        stroke: COLORS.navy,
+        fill: t.title,
+        stroke: t.lines,
         sw: 14
       })
     );
@@ -280,10 +278,10 @@ const KidsTheme = (function () {
         y: s(1200),
         text: settings.kidsAuthor || DEFAULTS.author,
         size: 100,
-        family: FAMILY.title,
+        family: t.family,
         weight: 800,
-        fill: COLORS.white,
-        stroke: COLORS.navy,
+        fill: t.title,
+        stroke: t.lines,
         sw: 22
       })
     );
@@ -291,12 +289,12 @@ const KidsTheme = (function () {
     return items;
   }
 
-  function pageItems(page, doc, settings) {
-    const items = [rect(0, 0, WIDTH, HEIGHT, COLORS.background)];
+  function pageItems(page, doc, settings, t) {
+    const items = [rect(0, 0, WIDTH, HEIGHT, t.background)];
     items.push(
-      rect(73, 73, 1263, 1854, COLORS.white, {
+      rect(73, 73, 1263, 1854, WHITE, {
         r: 76,
-        stroke: COLORS.cardBorder,
+        stroke: CARD_BORDER,
         sw: 14
       })
     );
@@ -308,7 +306,7 @@ const KidsTheme = (function () {
 
     if (cols * rows === 1) {
       const y = hasKey ? 500 : 548;
-      items.push(...boardItems(doc, page.items[0].puzzle, isSolution, 132, y, 1136));
+      items.push(...boardItems(doc, page.items[0].puzzle, isSolution, 132, y, 1136, t));
     } else {
       const gap = 50;
       const areaX = 150;
@@ -332,25 +330,26 @@ const KidsTheme = (function () {
             y: by + labelH / 2,
             text: label,
             size: 52,
-            family: FAMILY.text,
+            family: t.family,
             weight: 700,
-            fill: COLORS.navy
+            fill: t.ink
           })
         );
         const side = Math.min(bw, bh - labelH);
-        items.push(...boardItems(doc, item.puzzle, isSolution, bx + (bw - side) / 2, by + labelH, side));
+        items.push(...boardItems(doc, item.puzzle, isSolution, bx + (bw - side) / 2, by + labelH, side, t));
       });
     }
 
     if (hasKey) {
-      items.push(...keyItems(doc.symbols));
+      items.push(...keyItems(doc.symbols, t));
     }
 
     return items;
   }
 
   function buildItems(page, doc, settings) {
-    return page.type === "cover" ? coverItems(doc, settings) : pageItems(page, doc, settings);
+    const t = themeOf(settings);
+    return page.type === "cover" ? coverItems(doc, settings, t) : pageItems(page, doc, settings, t);
   }
 
   function escapeXml(value) {
@@ -449,15 +448,22 @@ const KidsTheme = (function () {
     drawItems(ctx, buildItems(page, doc, settings), k, images);
   }
 
-  function loadFonts() {
+  function inkFor(settings) {
+    return themeOf(settings).ink;
+  }
+
+  function loadFonts(settings) {
     if (!document.fonts) return Promise.resolve();
-    return Promise.all(FONT_LOADS.map((spec) => document.fonts.load(spec).catch(() => null)));
+    const font = themeOf(settings).font;
+    const specs = [`400 40px "${font}"`, `600 40px "${font}"`, `700 40px "${font}"`, `800 40px "${font}"`];
+    return Promise.all(specs.map((spec) => document.fonts.load(spec).catch(() => null)));
   }
 
   return {
     WIDTH,
     HEIGHT,
-    ink: COLORS.navy,
+    DEFAULT_FONT,
+    inkFor,
     markup,
     draw,
     loadFonts
