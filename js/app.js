@@ -262,12 +262,7 @@ function renderPreview() {
   preview.innerHTML = "";
   if (!doc) return;
   exportPuzzleInput.max = doc.puzzles.length;
-  const isKids = doc.theme === "kids";
-  styleFieldset.disabled = isKids;
-  kidsStyleFieldset.disabled = !isKids;
-  themeNote.textContent = isKids
-    ? "شكل تصميم قسم الأطفال ثابت ومطابق للنموذج، والألوان والخط تُعدَّل من قسم \"ألوان وخط قسم الأطفال\"."
-    : "";
+  updateStyleFieldsets();
 
   const settings = readSettings();
   const pages = PageRenderer.buildPages(doc, settings);
@@ -511,6 +506,31 @@ function onSettingsChange() {
   renderPreview();
 }
 
+function refreshThemeNote() {
+  if (!doc) {
+    themeNote.textContent = "";
+    return;
+  }
+  const kidsTab = activeTab === "children";
+  const docIsKids = doc.theme === "kids";
+  if (kidsTab && !docIsKids) {
+    themeNote.textContent = "عدّلي الألوان والخط كما تحبين، ثم اضغطي «توليد الصفحات» لتطبيقها على قسم الأطفال.";
+  } else if (!kidsTab && docIsKids) {
+    themeNote.textContent = "اضغطي «توليد الصفحات» لعرض القسم العام بالإعدادات الحالية.";
+  } else if (docIsKids) {
+    themeNote.textContent = "شكل تصميم قسم الأطفال ثابت، والألوان والخط تُعدَّل من قسم «ألوان وخط قسم الأطفال».";
+  } else {
+    themeNote.textContent = "";
+  }
+}
+
+function updateStyleFieldsets() {
+  const kidsTab = activeTab === "children";
+  styleFieldset.disabled = kidsTab;
+  kidsStyleFieldset.disabled = !kidsTab;
+  refreshThemeNote();
+}
+
 function switchTab(name) {
   activeTab = name;
   tabButtons.forEach((button) => {
@@ -520,6 +540,7 @@ function switchTab(name) {
   });
   panels.general.hidden = name !== "general";
   panels.children.hidden = name !== "children";
+  updateStyleFieldsets();
 }
 
 PageRenderer.FONTS.forEach((font) => {
@@ -549,4 +570,5 @@ titleSizeValue.textContent = `${toAr(titleSizeInput.value)} pt`;
 updateChildrenMode();
 updateExportMode();
 kidsCellsInput.disabled = kidsCellsDefaultInput.checked;
+updateStyleFieldsets();
 handleBuild();
